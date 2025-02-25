@@ -82,13 +82,16 @@ SERVER_IP=$(hostname -I | cut -d' ' -f1)
 
 cat > /etc/nginx/sites-available/painter-timesheet << EOL
 server {
-    listen 80;
+    listen 80 default_server;
+    listen [::]:80 default_server;
     server_name $SERVER_IP;
+    
+    root /var/www/painter-timesheet;
+    index index.html;
 
     # Serve static files for the React app
     location / {
-        root /var/www/painter-timesheet;
-        try_files \$uri /index.html;
+        try_files \$uri \$uri/ /index.html;
     }
 
     # API endpoints
@@ -117,6 +120,10 @@ fi
 echo "Testing Nginx configuration..."
 nginx -t
 
+# Ensure Nginx is stopped before restarting
+echo "Stopping Nginx service..."
+systemctl stop nginx
+
 # Step 18: Start the server with PM2
 echo "Starting server with PM2..."
 cd /var/www/painter-timesheet/server
@@ -139,6 +146,16 @@ systemctl restart nginx
 # Step 22: Display status
 echo "Checking PM2 status..."
 pm2 status
+
+# Step 23: Debugging info
+echo "Checking deployed files..."
+ls -la /var/www/painter-timesheet/
+echo "Checking Nginx configuration..."
+ls -la /etc/nginx/sites-enabled/
+echo "Checking server process..."
+netstat -tulpn | grep node
+echo "Checking Nginx status..."
+systemctl status nginx --no-pager
 
 # Output success message with IP
 echo "===== Painter Timesheet VPS Setup Complete ====="
