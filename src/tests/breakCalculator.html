@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Break Deduction Calculator Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="time"], button {
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .results {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+    }
+    .result-item {
+      margin-bottom: 10px;
+    }
+    .test-cases {
+      margin-top: 30px;
+    }
+    .test-case {
+      background-color: #eef;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+    .pass {
+      color: green;
+      font-weight: bold;
+    }
+    .fail {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Break Deduction Calculator Test</h1>
+  
+  <div class="calculator">
+    <div class="input-group">
+      <label for="startTime">Start Time:</label>
+      <input type="time" id="startTime" value="08:00">
+    </div>
+    
+    <div class="input-group">
+      <label for="endTime">End Time:</label>
+      <input type="time" id="endTime" value="17:00">
+    </div>
+    
+    <div class="input-group">
+      <label for="breakStart">Break Start:</label>
+      <input type="time" id="breakStart" value="12:00">
+    </div>
+    
+    <div class="input-group">
+      <label for="breakEnd">Break End:</label>
+      <input type="time" id="breakEnd" value="12:30">
+    </div>
+    
+    <button id="calculate">Calculate Hours</button>
+    
+    <div class="results" id="results">
+      <div class="result-item">Total Time: <span id="totalTime">--</span></div>
+      <div class="result-item">Break Duration: <span id="breakDuration">--</span></div>
+      <div class="result-item">Break Deduction: <span id="breakDeduction">--</span></div>
+      <div class="result-item">Final Hours: <span id="finalHours">--</span></div>
+    </div>
+  </div>
+  
+  <div class="test-cases">
+    <h2>Break Deduction Rules Test Cases</h2>
+    <div id="testResults"></div>
+  </div>
+  
+  <script>
+    // Break deduction rules
+    function calculateBreakDeduction(breakMinutes) {
+      if (breakMinutes <= 30) {
+        return 0; // No deduction
+      } else if (breakMinutes <= 60) {
+        return 30; // 30 minute deduction
+      } else {
+        return breakMinutes; // Full deduction
+      }
+    }
+    
+    // Time utilities
+    function timeToMinutes(timeString) {
+      const [hours, minutes] = timeString.split(':').map(Number);
+      return hours * 60 + minutes;
+    }
+    
+    function minutesToTimeString(minutes) {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours}h ${mins}m`;
+    }
+    
+    // Calculate total hours
+    function calculateHours() {
+      const startTime = document.getElementById('startTime').value;
+      const endTime = document.getElementById('endTime').value;
+      const breakStart = document.getElementById('breakStart').value;
+      const breakEnd = document.getElementById('breakEnd').value;
+      
+      // Convert times to minutes
+      const startMinutes = timeToMinutes(startTime);
+      const endMinutes = timeToMinutes(endTime);
+      const breakStartMinutes = timeToMinutes(breakStart);
+      const breakEndMinutes = timeToMinutes(breakEnd);
+      
+      // Calculate total minutes
+      const totalMinutes = endMinutes - startMinutes;
+      
+      // Calculate break minutes
+      let breakMinutes = 0;
+      if (breakStart && breakEnd) {
+        breakMinutes = breakEndMinutes - breakStartMinutes;
+        if (breakMinutes < 0) {
+          breakMinutes = 0;
+        }
+      }
+      
+      // Calculate deduction
+      const deduction = calculateBreakDeduction(breakMinutes);
+      
+      // Calculate final hours
+      const finalMinutes = totalMinutes - deduction;
+      
+      // Display results
+      document.getElementById('totalTime').textContent = minutesToTimeString(totalMinutes);
+      document.getElementById('breakDuration').textContent = minutesToTimeString(breakMinutes);
+      document.getElementById('breakDeduction').textContent = minutesToTimeString(deduction);
+      document.getElementById('finalHours').textContent = minutesToTimeString(finalMinutes);
+    }
+    
+    // Run test cases
+    function runTestCases() {
+      const testCases = [
+        { minutes: 0, expected: 0, description: "No break (0 minutes)" },
+        { minutes: 15, expected: 0, description: "Short break (15 minutes)" },
+        { minutes: 30, expected: 0, description: "Maximum no-deduction break (30 minutes)" },
+        { minutes: 31, expected: 30, description: "Just over threshold (31 minutes)" },
+        { minutes: 45, expected: 30, description: "Medium break (45 minutes)" },
+        { minutes: 60, expected: 30, description: "Maximum partial-deduction break (60 minutes)" },
+        { minutes: 61, expected: 61, description: "Just over 1 hour (61 minutes)" },
+        { minutes: 90, expected: 90, description: "Long break (90 minutes)" },
+        { minutes: 120, expected: 120, description: "2 hour break (120 minutes)" }
+      ];
+      
+      const resultsDiv = document.getElementById('testResults');
+      resultsDiv.innerHTML = '';
+      
+      testCases.forEach(test => {
+        const result = calculateBreakDeduction(test.minutes);
+        const passed = result === test.expected;
+        
+        const testDiv = document.createElement('div');
+        testDiv.className = 'test-case';
+        testDiv.innerHTML = `
+          <div><strong>Test:</strong> ${test.description}</div>
+          <div><strong>Break Duration:</strong> ${test.minutes} minutes</div>
+          <div><strong>Expected Deduction:</strong> ${test.expected} minutes</div>
+          <div><strong>Actual Deduction:</strong> ${result} minutes</div>
+          <div><strong>Result:</strong> <span class="${passed ? 'pass' : 'fail'}">${passed ? 'PASS' : 'FAIL'}</span></div>
+        `;
+        
+        resultsDiv.appendChild(testDiv);
+      });
+    }
+    
+    // Set up event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('calculate').addEventListener('click', calculateHours);
+      
+      // Run test cases automatically
+      runTestCases();
+      
+      // Initial calculation
+      calculateHours();
+    });
+  </script>
+</body>
+</html>
