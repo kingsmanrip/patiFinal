@@ -8,6 +8,26 @@ const API_URL = process.env.NODE_ENV === 'production' ? '/api' : 'http://localho
 // Constants for storage keys
 export const TIMESHEET_STORAGE_KEY = 'timesheets';
 
+/**
+ * Initialize the timesheet service
+ * Ensures that the timesheets storage exists in localStorage
+ */
+export const initializeTimesheetService = () => {
+  try {
+    // Check if timesheets exist in localStorage
+    const existingTimesheets = localStorage.getItem(TIMESHEET_STORAGE_KEY);
+    
+    // If not, initialize with an empty array
+    if (!existingTimesheets) {
+      localStorage.setItem(TIMESHEET_STORAGE_KEY, JSON.stringify([]));
+    }
+    
+    console.log('Timesheet service initialized');
+  } catch (error) {
+    console.error('Error initializing timesheet service:', error);
+  }
+};
+
 // Helper function to calculate deduction based on break minutes
 export const calculateBreakDeduction = (breakMinutes) => {
   if (breakMinutes <= 30) {
