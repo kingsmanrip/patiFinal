@@ -4,8 +4,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/
 import { Alert, AlertTitle, AlertDescription } from './ui/alert';
 import { Link, useNavigate } from 'react-router-dom';
 import UserManagement from './UserManagement';
-import { getAllUsers, getCurrentUser, logoutUser, getAllTimesheetEntries } from '../services/userService';
-import { deleteEntry } from '../services/timesheetService';
+import { getAllUsers, getCurrentUser, logoutUser } from '../services/userService';
+import { getAllTimesheetEntries, deleteEntry } from '../services/timesheetService';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
